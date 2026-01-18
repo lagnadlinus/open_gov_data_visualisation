@@ -77,7 +77,7 @@ def load_crime_data():
     # 2. Find row indices where column 1 is a State Name.
     # 3. Slice blocks.
     
-    # For now, I'll restrict to just standardizing it if it's simple.
+    # For now, I'll restrict to just standardising it if it's simple.
     # If it's too complex, I might skip detailed parsing for the first pass and just return raw-ish.
     # BUT we need 2019-2023 data for the dashboard.
     
