@@ -17,7 +17,7 @@ If you discover a security vulnerability within this project, please report it p
 
 **Do not open a public GitHub issue.**
 
-Instead, please email the maintainer at `your-email@example.com` (replace with actual email) with a detailed description of the issue. We will strive to acknowledge your report within 48 hours.
+Instead, please email the maintainer at `dangalsunil@gmail.com` with a detailed description of the issue. We will strive to acknowledge your report within 48 hours.
 
 ## Security Best Practices Audit
 
@@ -28,9 +28,9 @@ This project adheres to the following security standards:
 *   **Git Hygiene**: `.env` files and other local configuration files are explicitly excluded in `.gitignore`.
 
 ### 2. Data Privacy & Hygiene
-*   **Open Data Only**: This project is designed to visualize **publicly available** datasets (e.g., ABS, AIHW).
+*   **Open Data Only**: This project is designed to visualise **publicly available** datasets (e.g., ABS, AIHW).
 *   **No PII**: No Personally Identifiable Information (PII) is stored or processed.
-*   **Sanitization**: The ETL pipeline (`etl/loaddata.py`) is designed to strip potential metadata outliers, though the primary input source is already anonymized public data.
+*   **Sanitisation**: The ETL pipeline (`etl/loaddata.py`) is designed to strip potential metadata outliers, though the primary input source is already anonymised public data.
 *   **Git Exclusion**: Raw data directories (`data/`, `datas/`) are git-ignored to prevent accidental uploads of large or unverified files.
 
 ### 3. Dependencies

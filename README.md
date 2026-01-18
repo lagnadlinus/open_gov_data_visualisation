@@ -9,7 +9,7 @@
 
 <br>
 
-**A production-ready data storytelling platform visualizing the factors influencing youth education, employment, and mental health choices in Australia.**
+**A production-ready data storytelling platform visualising the factors influencing youth education, employment, and mental health choices in Australia.**
 
 [Features](#-key-features) •
 [Quick Start](#-quick-start) •
@@ -31,11 +31,11 @@ This project transforms open government data (ABS, AIHW) into an immersive, inte
     *   **Consolidated Home View**: See the big picture with cross-correlated charts.
     *   **Deep Dives**: Dedicated tabs for Income, Education, Crime, and Mental Health.
     *   **Zoom & Pan**: Powered by Plotly.js for detailed data exploration.
-*   **🗺️ Geospatial & Demographics**: Interactive visualizations of data distribution across Australian states.
-*   **📑 Resource Center**: 
+*   **🗺️ Geospatial & Demographics**: Interactive visualisations of data distribution across Australian states.
+*   **📑 Resource Centre**: 
     *   **Smart Print**: Generate clean, full-page PDF reports of the dashboard.
     *   **Downloads**: Access original research papers (PDF) and high-res charts (PNG).
-*   **🏗️ Robust Data Pipeline**: Automated ETL process converting raw CSVs to optimized Parquet files.
+*   **🏗️ Robust Data Pipeline**: Automated ETL process converting raw CSVs to optimised Parquet files.
 
 ---
 
@@ -69,7 +69,7 @@ For developers wanting to modify the code.
 
 2.  **Run ETL (Data Processing)**:
     ```bash
-    # Transforms raw CSV data into optimized Parquet files
+    # Transforms raw CSV data into optimised Parquet files
     python -m etl.loaddata
     ```
 
@@ -100,9 +100,9 @@ Built with a focus on performance, scalability, and maintainability.
 
 ```mermaid
 graph LR
-    A[Raw Data (CSV)] -->|ETL Script| B(Processed Parquet)
+    A["Raw Data (CSV)"] -->|ETL Script| B("Processed Parquet")
     B -->|Pandas| C[Django Views]
-    C -->|JSON API| D[Frontend (Plotly.js)]
+    C -->|JSON API| D["Frontend (Plotly.js)"]
     
     subgraph Data Layer
     A
