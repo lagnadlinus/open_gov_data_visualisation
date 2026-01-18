@@ -131,6 +131,9 @@ STORAGES = {
     },
 }
 
+# Fix for serving static files in development without collectstatic (when DEBUG=False)
+WHITENOISE_USE_FINDERS = True
+
 
 
 # Default primary key field type

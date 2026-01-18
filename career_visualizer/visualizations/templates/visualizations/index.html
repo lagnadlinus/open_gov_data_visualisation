@@ -738,11 +738,11 @@
             if (type === 'paper') {
                 file = document.getElementById('paperSelect').value;
                 if (!file) { alert('Please select a paper first.'); return; }
-                path = "/static/visualizations/reports/" + file;
+                path = "/static/visualizations/reports/" + encodeURIComponent(file);
             } else if (type === 'visual') {
                 file = document.getElementById('visualSelect').value;
                 if (!file) { alert('Please select a visualisation first.'); return; }
-                path = "/static/visualizations/images/" + file;
+                path = "/static/visualizations/images/" + encodeURIComponent(file);
             }
 
             const link = document.createElement("a");
