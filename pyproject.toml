@@ -1,0 +1,23 @@
+[project]
+name = "govhack-visualizer"
+version = "0.1.0"
+description = "GovHack Data Visualisation Dashboard"
+requires-python = ">=3.11"
+dependencies = [
+    "django>=4.2",
+    "pandas>=2.0",
+    "plotly>=5.0",
+    "python-dotenv>=1.0",
+    "whitenoise>=6.0",
+    "gunicorn>=21.0",
+    "psycopg2-binary>=2.9", # Prepared for Postgres if needed, though starting with SQLite
+    "pyarrow>=14.0", # For parquet support
+]
+
+[build-system]
+requires = ["flit_core>=3.2,<4"]
+build-backend = "flit_core.buildapi"
+
+[tool.pytest.ini_options]
+DJANGO_SETTINGS_MODULE = "career_visualizer.settings"
+python_files = ["tests.py", "test_*.py", "*_tests.py"]

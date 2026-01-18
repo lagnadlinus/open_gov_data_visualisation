@@ -1,225 +1,895 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" data-theme="light">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Youth Career Visualization</title>
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script> <!-- Chart.js -->
+    <title>GovHack Insights 2024</title>
+    <!-- Plotly.js -->
+    <script src="https://cdn.plot.ly/plotly-2.27.0.min.js"></script>
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Outfit:wght@500;700&display=swap"
+        rel="stylesheet">
+
     <style>
-        /* General Styling */
+        /* --- Design System --- */
+        :root {
+            --bg-body: #F3F4F6;
+            --bg-sidebar: #0F172A;
+            --bg-card: #FFFFFF;
+            --text-primary: #1F2937;
+            --text-secondary: #6B7280;
+            --text-sidebar: #94A3B8;
+            --text-sidebar-active: #FFFFFF;
+            --accent: #3B82F6;
+            /* Professional Blue */
+            --accent-glow: rgba(59, 130, 246, 0.5);
+            --border: #E5E7EB;
+            --card-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+            --transition: all 0.3s ease;
+
+            --font-size-base: 16px;
+        }
+
+        [data-theme="dark"] {
+            --bg-body: #0B1120;
+            --bg-sidebar: #020617;
+            --bg-card: #1E293B;
+            --text-primary: #F8FAFC;
+            --text-secondary: #CBD5E1;
+            --border: #334155;
+            --card-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.3);
+            /* Darkened Yellow/Amber for better contrast with white text */
+            --accent: #D97706;
+            /* Amber 600 */
+        }
+
+        /* Accessibility Modes */
+        body.font-large {
+            --font-size-base: 20px;
+        }
+
+        body.high-contrast {
+            --accent: #1d4ed8;
+            --text-primary: #000;
+            --bg-body: #FFF;
+        }
+
+        [data-theme="dark"] body.high-contrast {
+            --accent: #f59e0b;
+            /* Brighter amber for black BG */
+            --text-primary: #FFF;
+            --bg-body: #000;
+        }
+
+        /* Base */
+        * {
+            box-sizing: border-box;
+        }
+
         body {
-            font-family: 'Roboto', sans-serif;
-            background-color: #f4f7fa;
-            color: #333;
+            font-family: 'Inter', sans-serif;
+            background-color: var(--bg-body);
+            color: var(--text-primary);
+            font-size: var(--font-size-base);
             margin: 0;
-            padding: 0;
-            display: flex;
-            justify-content: center;
-            align-items: center;
             min-height: 100vh;
+            display: flex;
+            transition: var(--transition);
         }
 
-        /* Container */
-        .container {
-            width: 90%;
-            max-width: 900px;
-            background-color: white;
-            padding: 30px;
-            border-radius: 10px;
-            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1);
+        /* --- Layout --- */
+        .layout {
+            display: flex;
+            width: 100%;
+            height: 100vh;
+            overflow: hidden;
         }
 
-        h1 {
-            font-size: 24px;
-            margin-bottom: 20px;
-            text-align: center;
-            color: #2c3e50;
-        }
-
-        .filter-section {
+        /* --- Sidebar --- */
+        .sidebar {
+            width: 280px;
+            background-color: var(--bg-sidebar);
             display: flex;
             flex-direction: column;
-            margin-bottom: 20px;
+            padding: 1.5rem;
+            flex-shrink: 0;
+            border-right: 1px solid rgba(255, 255, 255, 0.05);
+            z-index: 50;
         }
 
-        .filter-section label {
-            font-weight: bold;
-            margin-bottom: 10px;
-            color: #2c3e50;
+        .brand {
+            font-family: 'Outfit', sans-serif;
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: #F8FAFC;
+            margin-bottom: 3rem;
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            letter-spacing: -0.025em;
+            cursor: pointer;
         }
 
-        .filter-section input[type="range"] {
-            width: 100%;
+        .brand span {
+            color: var(--accent);
         }
 
-        .filter-section input[type="checkbox"] {
-            margin-right: 10px;
+        .nav-header {
+            font-size: 0.75rem;
+            text-transform: uppercase;
+            color: #64748B;
+            font-weight: 700;
+            margin-bottom: 0.75rem;
         }
 
-        .range-output {
+        .nav-links {
+            list-style: none;
+            padding: 0;
+            margin: 0 0 2rem 0;
+            display: flex;
+            flex-direction: column;
+            gap: 0.25rem;
+        }
+
+        .nav-item {
+            padding: 0.75rem 1rem;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: var(--transition);
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            color: var(--text-sidebar);
+            font-weight: 500;
+            font-size: 0.95rem;
+        }
+
+        .nav-item:hover {
+            color: var(--text-sidebar-active);
+            background-color: rgba(255, 255, 255, 0.05);
+        }
+
+        /* Active State Fix */
+        .nav-item.active {
+            color: white;
+            /* Ensure visible text on accent */
+            background: var(--accent);
+            box-shadow: 0 4px 12px var(--accent-glow);
+        }
+
+        /* --- Main Content --- */
+        .main-content {
+            flex: 1;
+            overflow-y: auto;
+            padding: 2rem;
+            position: relative;
+            scroll-behavior: smooth;
+        }
+
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 2rem;
+        }
+
+        .page-title h1 {
+            font-family: 'Outfit';
+            margin: 0;
+            font-size: 2rem;
+        }
+
+        .page-title p {
+            color: var(--text-secondary);
+            margin-top: 0.5rem;
+        }
+
+        /* --- Floating Action Button --- */
+        .fab-container {
+            position: fixed;
+            bottom: 2rem;
+            right: 2rem;
+            z-index: 1000;
+            display: flex;
+            flex-direction: column-reverse;
+            gap: 1rem;
+            align-items: center;
+        }
+
+        .fab-main {
+            width: 56px;
+            height: 56px;
+            background: var(--accent);
+            color: white;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+            cursor: pointer;
+            transition: transform 0.2s;
+            border: none;
+        }
+
+        .fab-main:hover {
+            transform: scale(1.1);
+        }
+
+        .fab-options {
+            display: none;
+            flex-direction: column;
+            gap: 0.5rem;
+            background: var(--bg-card);
+            padding: 1rem;
+            border-radius: 12px;
+            box-shadow: var(--card-shadow);
+            border: 1px solid var(--border);
+            min-width: 150px;
+        }
+
+        .fab-container.active .fab-options {
+            display: flex;
+            animation: slideUp 0.3s;
+        }
+
+        .fab-btn-sm {
+            background: transparent;
+            border: 1px solid var(--border);
+            padding: 0.5rem;
+            border-radius: 8px;
+            cursor: pointer;
+            color: var(--text-primary);
+            font-size: 0.85rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        /* --- Components --- */
+        .dashboard-grid {
+            display: grid;
+            grid-template-columns: repeat(12, 1fr);
+            gap: 1.5rem;
+            margin-bottom: 3rem;
+        }
+
+        .card {
+            background: var(--bg-card);
+            border-radius: 16px;
+            padding: 1.5rem;
+            border: 1px solid var(--border);
+            box-shadow: var(--card-shadow);
+        }
+
+        .card-header {
+            margin-bottom: 1.5rem;
             display: flex;
             justify-content: space-between;
             align-items: center;
         }
 
-        .range-output span {
-            font-size: 14px;
-            color: #34495e;
+        .card-title {
+            font-weight: 700;
+            font-family: 'Outfit';
+            font-size: 1.1rem;
         }
 
-        /* Chart Area */
-        #youthChart {
-            margin-top: 40px;
+        .kpi-card {
+            grid-column: span 3;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
         }
 
-        /* Condition Message Styling */
-        #conditionMessage {
-            margin-top: 20px;
-            font-weight: bold;
-            text-align: center;
-            color: #e74c3c;
+        .chart-card {
+            grid-column: span 6;
+            min-height: 400px;
         }
 
-        /* Button Styling */
-        button {
-            padding: 10px 20px;
-            background-color: #3498db;
+        .wide-card {
+            grid-column: span 12;
+            min-height: 500px;
+        }
+
+        @media (max-width: 1024px) {
+            .chart-card {
+                grid-column: span 12;
+            }
+
+            .kpi-card {
+                grid-column: span 6;
+            }
+        }
+
+        /* Report Form */
+        .report-form {
+            max-width: 600px;
+            margin: 0 auto;
+            display: flex;
+            flex-direction: column;
+            gap: 1.5rem;
+        }
+
+        .form-control {
+            width: 100%;
+            padding: 0.8rem;
+            border-radius: 8px;
+            border: 1px solid var(--border);
+            background: var(--bg-body);
+            color: var(--text-primary);
+            font-size: 1rem;
+        }
+
+        .btn-primary {
+            background: var(--accent);
             color: white;
+            padding: 1rem;
             border: none;
-            border-radius: 5px;
+            border-radius: 8px;
+            font-weight: 600;
             cursor: pointer;
-            transition: background-color 0.3s ease;
         }
 
-        button:hover {
-            background-color: #2980b9;
+        @keyframes slideUp {
+            from {
+                opacity: 0;
+                transform: translateY(10px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        /* --- Print Styles --- */
+        @media print {
+
+            /* Hide UI Chrome */
+            .sidebar,
+            .fab-container,
+            .controls,
+            .header .controls,
+            .nav-links,
+            .report-form,
+            .btn-primary,
+            button {
+                display: none !important;
+            }
+
+            /* Reset Layout */
+            body,
+            .layout,
+            .main-content {
+                display: block !important;
+                height: auto !important;
+                overflow: visible !important;
+                background: white !important;
+                color: black !important;
+                width: 100% !important;
+                margin: 0 !important;
+                padding: 0 !important;
+            }
+
+            /* Force Overview to Show */
+            .view-section {
+                display: none !important;
+            }
+
+            #view-overview {
+                display: block !important;
+            }
+
+            /* Dashboard Grid Adjustments */
+            .dashboard-grid {
+                display: block !important;
+                /* Stack for print to avoid grid cutoff */
+            }
+
+            .card {
+                break-inside: avoid;
+                box-shadow: none !important;
+                border: 1px solid #ccc !important;
+                margin-bottom: 2rem;
+                page-break-inside: avoid;
+            }
+
+            /* Chart Visibility */
+            .js-plotly-plot {
+                width: 100% !important;
+                height: auto !important;
+            }
+
+            /* Headers */
+            .page-title h1 {
+                font-size: 24pt;
+                color: black;
+            }
+
+            .page-title p {
+                color: #555;
+            }
         }
     </style>
 </head>
 
 <body>
 
-<div class="container">
-    <h1>Youth Career Visualization</h1>
-
-    <!-- Filters -->
-    <div class="filter-section">
-        <label for="yearRange">Year Range:</label>
-        <div class="range-output">
-            <input type="range" id="yearRange" min="1960" max="2023" step="1" value="2023">
-            <span id="yearRangeValue">2023</span>
+    <!-- Floating Accessibility -->
+    <div class="fab-container" id="fabContainer">
+        <div class="fab-options">
+            <button class="fab-btn-sm" onclick="setFontSize('large')">🔍 Large Text</button>
+            <button class="fab-btn-sm" onclick="setFontSize('normal')">👁️ Normal Text</button>
+            <button class="fab-btn-sm" onclick="toggleContrast()">🌗 High Contrast</button>
+            <button class="fab-btn-sm" onclick="toggleTheme()">🌓 Dark/Light</button>
         </div>
+        <button class="fab-main" onclick="toggleFab()" aria-label="Accessibility Menu">
+            <svg width="24" height="24" viewBox="0 0 24 24">
+                <path d="M12 2c1.1 0 2 .9 2 2s-.9 2-2 2-2-.9-2-2 .9-2 2-2zm9 7h-6v13h-2v-6h-2v6H9V9H3V7h18v2z" />
+            </svg>
+        </button>
     </div>
 
-    <div class="filter-section">
-        <label>Education Level:</label>
-        <div>
-            <input type="checkbox" id="none" value="None"> None
-            <input type="checkbox" id="tafe" value="TAFE"> TAFE
-            <input type="checkbox" id="masters" value="Masters"> Masters
-            <input type="checkbox" id="phd" value="PhD"> PhD
-        </div>
+    <div class="layout">
+        <aside class="sidebar">
+            <div class="brand" onclick="switchView('overview', null)">
+                GovHack <span>'24</span>
+            </div>
+
+            <div class="nav-header">Dashboards</div>
+            <ul class="nav-links">
+                <li class="nav-item active" onclick="switchView('overview', this)">
+                    <svg width="20" height="20" viewBox="0 0 24 24">
+                        <path d="M4 6h16v2H4zm0 5h16v2H4zm0 5h16v2H4z" />
+                    </svg>
+                    All Data (Home)
+                </li>
+                <li class="nav-item" onclick="switchView('income', this)">
+                    <svg width="20" height="20" viewBox="0 0 24 24">
+                        <path
+                            d="M11.8 10.9c-2.27-.59-3-1.2-3-2.15 0-1.09 1.01-1.85 2.7-1.85 1.78 0 2.44.85 2.5 2.1h2.21c-.07-1.72-1.12-3.3-3.21-3.81V3h-3v2.16c-1.94.42-3.5 1.68-3.5 3.61 0 2.31 1.91 3.46 4.7 4.13 2.5.6 3 1.48 3 2.41 0 .69-.49 1.79-2.7 1.79-2.06 0-2.87-.92-2.98-2.1h-2.2c.12 2.19 1.76 3.42 3.68 3.83V21h3v-2.15c1.95-.37 3.5-1.5 3.5-3.55 0-2.84-2.43-3.81-4.7-4.4z" />
+                    </svg>
+                    Income
+                </li>
+                <li class="nav-item" onclick="switchView('education', this)">
+                    <svg width="20" height="20" viewBox="0 0 24 24">
+                        <path d="M12 3L1 9l11 6 9-4.91V17h2V9L12 3zM5 13.18v4L12 21l7-3.82v-4L12 17l-7-3.82z" />
+                    </svg>
+                    Education
+                </li>
+                <li class="nav-item" onclick="switchView('crime', this)">
+                    <svg width="20" height="20" viewBox="0 0 24 24">
+                        <path
+                            d="M18 11.03c0-2.61-1.92-4.83-4.52-5.02-3.73-.28-6.4 3.01-5.55 6.47.38 1.55 1.62 2.79 3.17 3.17 3.46.85 6.75-1.82 6.47-5.55.35.34.43.68.43.93zm-3.03.47c-.57.14-1.08-.28-1.08-.85 0-.58.12-.91.73-.99.57-.08 1.05.35.97.92-.02.57-.05.78-.62.92zM6 9v2h2V9H6zm4 0v2h2V9h-2zm4 0v2h2V9h-2zm-8 4v2h2v-2H6zm8 0v2h2v-2h-2zm-4 4v2h2v-2h-2zm-4 0v2h2v-2H6z" />
+                    </svg>
+                    Crime
+                </li>
+                <li class="nav-item" onclick="switchView('mental', this)">
+                    <svg width="20" height="20" viewBox="0 0 24 24">
+                        <path
+                            d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z" />
+                    </svg>
+                    Mental Health
+                </li>
+            </ul>
+
+            <div class="nav-header">Analysis</div>
+            <ul class="nav-links">
+                <li class="nav-item" onclick="switchView('demographics', this)">Demographics</li>
+                <li class="nav-item" onclick="switchView('reports', this)">Report Generator</li>
+            </ul>
+        </aside>
+
+        <main class="main-content">
+            <header class="header">
+                <div class="page-title">
+                    <h1 id="page-header">Socioeconomic Overview</h1>
+                    <p>Consolidated view of all data sources.</p>
+                </div>
+            </header>
+
+            <div id="loading" style="text-align:center; padding: 4rem;">
+                <h2>Loading Data...</h2>
+            </div>
+
+            <!-- View: OVERVIEW (Consolidated) -->
+            <div id="view-overview" class="view-section">
+                <div class="dashboard-grid">
+                    <!-- Row 1: Story -->
+                    <div class="card wide-card">
+                        <div class="card-header"><span class="card-title">Income vs. Education (Correlation)</span>
+                        </div>
+                        <div id="overviewStoryChart"></div>
+                    </div>
+                    <!-- Row 2: Four Key Pillars -->
+                    <div class="card chart-card">
+                        <div class="card-header"><span class="card-title">Income Distribution</span></div>
+                        <div id="overviewIncomeChart"></div>
+                    </div>
+                    <div class="card chart-card">
+                        <div class="card-header"><span class="card-title">Education Enrollment</span></div>
+                        <div id="overviewEduChart"></div>
+                    </div>
+                    <div class="card chart-card">
+                        <div class="card-header"><span class="card-title">Crime Trends</span></div>
+                        <div id="overviewCrimeChart"></div>
+                    </div>
+                    <div class="card chart-card">
+                        <div class="card-header"><span class="card-title">Mental Health Impact</span></div>
+                        <div id="overviewMhChart"></div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Segregated Views (Same logic as before but hidden by default) -->
+            <div id="view-income" class="view-section" style="display:none">
+                <div class="dashboard-grid">
+                    <div class="card wide-card">
+                        <div class="card-header"><span class="card-title">Family Income Deep Dive</span></div>
+                        <div id="incomeMainChart"></div>
+                    </div>
+                </div>
+            </div>
+            <div id="view-education" class="view-section" style="display:none">
+                <div class="dashboard-grid">
+                    <div class="card wide-card">
+                        <div class="card-header"><span class="card-title">Education Deep Dive</span></div>
+                        <div id="eduMainChart"></div>
+                    </div>
+                </div>
+            </div>
+            <div id="view-crime" class="view-section" style="display:none">
+                <div class="dashboard-grid">
+                    <div class="card wide-card">
+                        <div class="card-header"><span class="card-title">Crime Deep Dive</span></div>
+                        <div id="crimeMainChart" style="height: 600px;"></div>
+                    </div>
+                </div>
+            </div>
+            <div id="view-mental" class="view-section" style="display:none">
+                <div class="dashboard-grid">
+                    <div class="card wide-card">
+                        <div class="card-header"><span class="card-title">Mental Health Trends</span></div>
+                        <div id="mhMainChart"></div>
+                    </div>
+                    <div class="card chart-card">
+                        <div class="card-header"><span class="card-title">Disability Breakdown</span></div>
+                        <div id="mhAgeChart"></div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- View: DEMOGRAPHICS (Fixed) -->
+            <div id="view-demographics" class="view-section" style="display:none">
+                <div class="dashboard-grid">
+                    <div class="card wide-card" style="min-height: 700px;">
+                        <div class="card-header"><span class="card-title">Demographic Distribution (State
+                                Breakdown)</span></div>
+                        <div id="demoChart"></div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- View: REPORTS (Functional) -->
+            <div id="view-reports" class="view-section" style="display:none">
+                <div class="card" style="max-width: 800px; margin: 0 auto; padding: 2rem;">
+                    <h2 style="margin-bottom: 2rem;">Report & Resource Center</h2>
+
+                    <!-- Dynamic Dashboard Export -->
+                    <div style="margin-bottom: 3rem; border-bottom: 1px solid var(--border); padding-bottom: 2rem;">
+                        <h3 style="font-size: 1.1rem; margin-bottom: 1rem;">Export Dashboard Data</h3>
+                        <div class="report-form" style="flex-direction: row; gap: 1rem;">
+                            <div class="form-group" style="flex: 1;">
+                                <select id="reportFormat" class="form-control">
+                                    <option value="csv">CSV Data Export (Raw Data)</option>
+                                    <option value="pdf">Print / PDF Dashboard Summary</option>
+                                </select>
+                            </div>
+                            <button class="btn-primary" onclick="generateReport()"
+                                style="width: auto; whitespace: nowrap;">Download / Print</button>
+                        </div>
+                    </div>
+
+                    <!-- Static Resources Download -->
+                    <div>
+                        <h3 style="font-size: 1.1rem; margin-bottom: 1rem;">Research Papers & Visualizations</h3>
+                        <p style="color: var(--text-secondary); margin-bottom: 1.5rem; font-size: 0.9rem;">
+                            Access the original research documents and high-resolution charts used in this project
+                            (2021-2023).
+                        </p>
+
+                        <div class="report-form">
+                            <div class="form-group">
+                                <label>Research Papers (PDF)</label>
+                                <div style="display: flex; gap: 1rem;">
+                                    <select id="paperSelect" class="form-control">
+                                        <option value="" disabled selected>Select a Research Paper...</option>
+                                        <option
+                                            value="2021 Australian Institute of Health and Welfare  Australia's youth_ Engagement in education or employment.pdf">
+                                            2021 AIHW: Youth Engagement in Education/Employment</option>
+                                        <option
+                                            value="2021 Groves et al. One student might get one opportunity and then ... inequities in Australian career education and recommendations for a fairer future.pdf">
+                                            2021 Groves et al: Inequities in Career Education</option>
+                                        <option value="2023 ILO Australia Public Employment Services.pdf">2023 ILO:
+                                            Public Employment Services</option>
+                                        <option
+                                            value="2023 ILO Technology in public employment services to promote youth employment.pdf">
+                                            2023 ILO: Tech in Public Employment Services</option>
+                                        <option value="2023 Working Future.pdf">2023 Working Future</option>
+                                    </select>
+                                    <button class="btn-primary" onclick="downloadAsset('paper')">Download</button>
+                                </div>
+                            </div>
+
+                            <div class="form-group">
+                                <label>Visualizations (PNG)</label>
+                                <div style="display: flex; gap: 1rem;">
+                                    <select id="visualSelect" class="form-control">
+                                        <option value="" disabled selected>Select a Visualization...</option>
+                                        <option value="Anxiety_Disorders_From_2020to2022.png">Trend: Anxiety Disorders
+                                            (2020-2022)</option>
+                                        <option value="Substance_Use_Disorders_From_2020to2022.png">Trend: Substance Use
+                                            Disorders (2020-2022)</option>
+                                    </select>
+                                    <button class="btn-primary" onclick="downloadAsset('visual')">Download</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+        </main>
     </div>
 
-    <div class="filter-section">
-        <label>Mental Health Issues:</label>
-        <input type="checkbox" id="mentalHealth" value="true"> Yes
-    </div>
+    <script>
+        let GLOBAL_DATA = null;
 
-    <div class="filter-section">
-        <label>Crime Rate:</label>
-        <div>
-            <input type="checkbox" id="highCrime" value="High"> High
-            <input type="checkbox" id="mediumCrime" value="Medium"> Medium
-            <input type="checkbox" id="lowCrime" value="Low"> Low
-            <input type="checkbox" id="veryLowCrime" value="Very Low"> Very Low
-        </div>
-    </div>
+        function toggleFab() { document.getElementById('fabContainer').classList.toggle('active'); }
 
-    <div class="filter-section">
-        <label for="incomeRange">Family Income Range:</label>
-        <div class="range-output">
-            <input type="range" id="incomeRange" min="7000" max="200000" step="1000" value="50000">
-            <span id="incomeRangeValue">$200000</span>
-        </div>
-    </div>
+        function switchView(viewName, el) {
+            // nav state
+            if (el) {
+                document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+                el.classList.add('active');
+            } else if (viewName === 'overview') {
+                // Clicked brand -> activate home tab
+                document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+                document.querySelector('.nav-item').classList.add('active'); // First item is Home
+            }
 
-    <!-- Canvas for Chart -->
-    <canvas id="youthChart" width="400" height="200"></canvas>
+            // section state
+            document.querySelectorAll('.view-section').forEach(s => s.style.display = 'none');
+            document.getElementById('view-' + viewName).style.display = 'block';
 
-    <!-- Message Section -->
-    <div id="conditionMessage">No specific condition met.</div>
-</div>
+            // titles
+            const titles = {
+                'overview': 'Socioeconomic Overview',
+                'income': 'Income Analysis',
+                'education': 'Education Pathways',
+                'crime': 'Crime Statistics (NSW)',
+                'mental': 'Mental Health',
+                'demographics': 'National Demographic Breakdown',
+                'reports': 'Report Generator'
+            };
+            document.getElementById('page-header').innerText = titles[viewName] || 'Dashboard';
 
-<script>
-    // Initial Setup for the Year and Income Range Sliders
-    const yearRange = document.getElementById('yearRange');
-    const yearRangeValue = document.getElementById('yearRangeValue');
-    const incomeRange = document.getElementById('incomeRange');
-    const incomeRangeValue = document.getElementById('incomeRangeValue');
+            // Explicitly redraw sunburst if demographics (fixes visibility bug)
+            if (viewName === 'demographics' && GLOBAL_DATA) {
+                setTimeout(() => RenderUtil.demographicsBar('demoChart', GLOBAL_DATA.mental_health), 100);
+            }
 
-    yearRange.addEventListener('input', () => {
-        yearRangeValue.textContent = yearRange.value;
-        updateData();
-    });
+            // Resize fix
+            setTimeout(() => window.dispatchEvent(new Event('resize')), 50);
+        }
 
-    incomeRange.addEventListener('input', () => {
-        incomeRangeValue.textContent = `$${incomeRange.value}`;
-        updateData();
-    });
+        // --- Accessibility ---
+        function setFontSize(size) {
+            document.body.classList.remove('font-large');
+            if (size === 'large') document.body.classList.add('font-large');
+            toggleFab();
+        }
+        function toggleContrast() {
+            document.body.classList.toggle('high-contrast');
+            toggleFab();
+            redrawAll();
+        }
+        function toggleTheme() {
+            const current = document.documentElement.getAttribute('data-theme');
+            const next = current === 'dark' ? 'light' : 'dark';
+            document.documentElement.setAttribute('data-theme', next);
+            toggleFab();
+            redrawAll();
+        }
 
-    // Chart.js: Initial Setup for Chart
-    const ctx = document.getElementById('youthChart').getContext('2d');
-    let youthChart = new Chart(ctx, {
-        type: 'bar',
-        data: {
-            labels: [], // We will update these dynamically
-            datasets: [{
-                label: 'Family Income',
-                data: [], // Dynamic data will be inserted here
-                backgroundColor: [], // Dynamic color coding based on criteria
-            }]
-        },
-        options: {
-            scales: {
-                y: {
-                    beginAtZero: true
-                }
+        // --- Reports Logic ---
+        function generateReport() {
+            const format = document.getElementById('reportFormat').value;
+            if (!GLOBAL_DATA) { alert('No data loaded!'); return; }
+
+            if (format === 'pdf') {
+                window.print(); // Browser native PDF generation
+            } else if (format === 'csv') {
+                // Identify active dataset or export all? Let's export consolidated Income for MVP
+                const headers = ["Category", "Year", "Value"];
+                const rows = GLOBAL_DATA.income.map(d => [d["Apprentice/trainee status"], d.Year, d.Value]);
+
+                let csvContent = "data:text/csv;charset=utf-8,"
+                    + headers.join(",") + "\n"
+                    + rows.map(e => e.join(",")).join("\n");
+
+                const encodedUri = encodeURI(csvContent);
+                const link = document.createElement("a");
+                link.setAttribute("href", encodedUri);
+                link.setAttribute("download", "govhack_data_export.csv");
+                document.body.appendChild(link);
+                link.click();
+                link.remove();
             }
         }
-    });
 
-    // Fetch Data and Update Chart Function
-    function updateData() {
-        fetch('/filter/')
-            .then(response => response.json())
-            .then(data => {
-                const educationLabels = data.map(item => item.education_level);
-                const familyIncomeData = data.map(item => item.family_income);
-                const colors = data.map(item => {
-                    if (item.education_level === 'None' && item.family_income < 50000) {
-                        return 'red'; // Serious issues
-                    } else if (item.education_level === 'PhD' && item.family_income > 186000) {
-                        return 'green'; // Controlled areas
-                    } else if (item.education_level === 'TAFE' && item.family_income < 130000 && item.family_income > 50000) {
-                        return 'orange'; // Need to keep an eye
-                    } else if (item.education_level === 'TAFE' && item.family_income < 100000 && item.family_income > 50000) {
-                        return 'blue'; // Free education consideration
-                    } else {
-                        return 'grey'; // Default color
-                    }
+        function downloadAsset(type) {
+            let path = "";
+            let file = "";
+
+            if (type === 'paper') {
+                file = document.getElementById('paperSelect').value;
+                if (!file) { alert('Please select a paper first.'); return; }
+                path = "/static/visualizations/reports/" + file;
+            } else if (type === 'visual') {
+                file = document.getElementById('visualSelect').value;
+                if (!file) { alert('Please select a visualization first.'); return; }
+                path = "/static/visualizations/images/" + file;
+            }
+
+            const link = document.createElement("a");
+            link.setAttribute("href", path);
+            link.setAttribute("download", file);
+            link.setAttribute("target", "_blank"); // Fallback
+            document.body.appendChild(link);
+            link.click();
+            link.remove();
+        }
+
+        // --- Data Loading ---
+        async function init() {
+            try {
+                const res = await fetch('/get_data/');
+                GLOBAL_DATA = await res.json();
+                document.getElementById('loading').style.display = 'none';
+
+                drawOverview();
+                drawDeepDives();
+
+            } catch (e) {
+                console.error(e);
+                document.getElementById('loading').innerHTML = `<p style="color:red">Error: ${e}</p>`;
+            }
+        }
+
+        function getLayout(title) {
+            const style = getComputedStyle(document.body);
+            const text = style.getPropertyValue('--text-primary').trim();
+            const grid = style.getPropertyValue('--border').trim();
+
+            return {
+                title: { text: title, font: { family: 'Outfit', size: 16, color: text } },
+                paper_bgcolor: 'transparent',
+                plot_bgcolor: 'transparent',
+                font: { color: text, family: 'Inter', size: 12 },
+                xaxis: { gridcolor: grid },
+                yaxis: { gridcolor: grid },
+                margin: { t: 30, b: 30, l: 40, r: 10 },
+                showlegend: true,
+                legend: { orientation: 'h', y: -0.2 }
+            };
+        }
+
+        function drawOverview() {
+            const d = GLOBAL_DATA;
+            if (!d) return;
+
+            // 1. Story (Mini)
+            RenderUtil.story('overviewStoryChart', d.income, d.education);
+            // 2. Income (Mini)
+            RenderUtil.bar('overviewIncomeChart', d.income, "Apprentice/trainee status", "Value");
+            // 3. Edu (Mini)
+            RenderUtil.line('overviewEduChart', d.education, "Apprentice/trainee status", "Value");
+            // 4. Crime (Mini - Top 3)
+            RenderUtil.line('overviewCrimeChart', d.crime, "Offence", "Rate");
+            // 5. Mental (Mini)
+            RenderUtil.bar('overviewMhChart', d.mental_health, "Age group", "Value");
+
+            // 6. Demographics (Overview Tab Hidden, but prepare it)
+            RenderUtil.demographicsBar('demoChart', d.mental_health);
+        }
+
+        function drawDeepDives() {
+            const d = GLOBAL_DATA;
+            if (!d) return;
+
+            RenderUtil.bar('incomeMainChart', d.income, "Apprentice/trainee status", "Value");
+            RenderUtil.line('eduMainChart', d.education, "Apprentice/trainee status", "Value");
+            RenderUtil.line('crimeMainChart', d.crime, "Offence", "Rate");
+            RenderUtil.bar('mhMainChart', d.mental_health, "Age group", "Value");
+            RenderUtil.scatter('mhAgeChart', d.mental_health, "Disability status", "Value");
+        }
+
+        // --- Render Utility ---
+        const RenderUtil = {
+            story: (id, incData, eduData) => {
+                const incMap = {}; incData.forEach(x => incMap[x.Year] = (incMap[x.Year] || 0) + x.Value);
+                const eduMap = {}; eduData.forEach(x => eduMap[x.Year] = (eduMap[x.Year] || 0) + x.Value);
+                const years = Object.keys(incMap).sort();
+
+                Plotly.newPlot(id, [
+                    { x: years, y: years.map(y => incMap[y]), name: 'Income', type: 'scatter' },
+                    { x: years, y: years.map(y => eduMap[y]), name: 'Enrollment', type: 'scatter', yaxis: 'y2' }
+                ], { ...getLayout(''), yaxis2: { overlaying: 'y', side: 'right' } }, { responsive: true });
+            },
+            line: (id, data, cat, val) => {
+                const traces = [...new Set(data.map(d => d[cat]))].map(g => {
+                    const rows = data.filter(d => d[cat] === g).sort((a, b) => a.Year - b.Year);
+                    return { x: rows.map(r => r.Year), y: rows.map(r => r[val]), name: g, type: 'scatter', mode: 'lines' };
+                });
+                Plotly.newPlot(id, traces, getLayout(''), { responsive: true });
+            },
+            bar: (id, data, cat, val) => {
+                const traces = [...new Set(data.map(d => d[cat]))].map(g => {
+                    const rows = data.filter(d => d[cat] === g);
+                    return { x: rows.map(r => r.Year), y: rows.map(r => r[val]), name: g, type: 'bar' };
+                });
+                Plotly.newPlot(id, traces, { ...getLayout(''), barmode: 'group' }, { responsive: true });
+            },
+            scatter: (id, data, cat, val) => {
+                const traces = [...new Set(data.map(d => d[cat]))].map(g => {
+                    const rows = data.filter(d => d[cat] === g).sort((a, b) => a.Year - b.Year);
+                    return { x: rows.map(r => r.Year), y: rows.map(r => r[val]), name: g, type: 'scatter', mode: 'markers+lines' };
+                });
+                Plotly.newPlot(id, traces, getLayout(''), { responsive: true });
+            },
+            demographicsBar: (id, data) => {
+                // Aggregate by State
+                const stateMap = {};
+                data.forEach(d => {
+                    const s = d["State/territory of data submitter"] || "Unknown";
+                    if (!stateMap[s]) stateMap[s] = 0;
+                    stateMap[s] += (d.Value || 0);
                 });
 
-                youthChart.data.labels = educationLabels;
-                youthChart.data.datasets[0].data = familyIncomeData;
-                youthChart.data.datasets[0].backgroundColor = colors;
+                const sortedStates = Object.keys(stateMap).sort((a, b) => stateMap[a] - stateMap[b]); // Sort for bar chart
 
-                youthChart.update(); // Refresh chart
-            });
-    }
+                Plotly.newPlot(id, [{
+                    type: 'bar',
+                    x: sortedStates.map(s => stateMap[s]),
+                    y: sortedStates,
+                    orientation: 'h', // Horizontal
+                    marker: {
+                        color: sortedStates.map(s => '#3B82F6'), // Consistent Blue
+                        opacity: 0.8
+                    },
+                    text: sortedStates.map(s => stateMap[s].toLocaleString()),
+                    textposition: 'auto'
+                }], {
+                    ...getLayout(''),
+                    title: { text: 'Mental Health Services by State/Territory', font: { family: 'Outfit', size: 16 } },
+                    xaxis: { title: 'Total Records / Cases' },
+                    margin: { l: 150, t: 40, b: 40, r: 20 } // Extra left margin for state names
+                }, { responsive: true });
+            }
+        };
 
-    // Initial chart update
-    updateData();
-</script>
+        function redrawAll() {
+            if (GLOBAL_DATA) { drawOverview(); drawDeepDives(); }
+        }
+
+        // Run
+        init();
+
+    </script>
 </body>
+
 </html>

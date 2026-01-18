@@ -1,35 +1,46 @@
 import pandas as pd
+from django.conf import settings
+from django.core.cache import cache
 from django.http import JsonResponse
 from django.shortcuts import render
-import os
-from django.conf import settings
 
-def load_csv_data():
-    # Define file paths
-    crime_file = os.path.join(settings.BASE_DIR, 'datas', 'crime_data.csv')
-    education_file = os.path.join(settings.BASE_DIR, 'datas', 'education_data.csv')
-    income_file = os.path.join(settings.BASE_DIR, 'datas', 'income_data.csv')
-    mental_health_file = os.path.join(settings.BASE_DIR, 'datas', 'mental_health_data.csv')
-    
-    # Load CSV files into DataFrames
-    crime_data = pd.read_csv(crime_file)
-    education_data = pd.read_csv(education_file)
-    income_data = pd.read_csv(income_file)
-    mental_health_data = pd.read_csv(mental_health_file)
+DATA_DIR = settings.BASE_DIR.parent / 'data' / 'processed'
 
-    return crime_data, education_data, income_data, mental_health_data
+def load_data():
+    """Load data from Parquet files with caching."""
+    data = cache.get('dashboard_data')
+    if data:
+        return data
+
+    try:
+        education_data = pd.read_parquet(DATA_DIR / 'education_data.parquet')
+        income_data = pd.read_parquet(DATA_DIR / 'income_data.parquet')
+        mental_health_data = pd.read_parquet(DATA_DIR / 'mental_health_data.parquet')
+        crime_path = DATA_DIR / 'crime_data.parquet'
+        crime_data = pd.read_parquet(crime_path) if crime_path.exists() else pd.DataFrame()
+    except (FileNotFoundError, Exception) as e:
+        # Fallback for dev/testing if ETL hasn't run
+        print(f"Error loading Parquet data: {e}. returning empty.")
+        return {}, {}, {}, {}
+
+    data = (crime_data, education_data, income_data, mental_health_data)
+    cache.set('dashboard_data', data, timeout=3600) # Cache for 1 hour
+    return data
 
 def index(request):
     return render(request, 'visualizations/index.html')
 
 def get_data(request):
-    crime_data, education_data, income_data, mental_health_data = load_csv_data()
+    crime_data, education_data, income_data, mental_health_data = load_data()
 
-    # Convert data to JSON format
-    crime_json = crime_data.to_dict(orient='records')
-    education_json = education_data.to_dict(orient='records')
-    income_json = income_data.to_dict(orient='records')
-    mental_health_json = mental_health_data.to_dict(orient='records')
+    if isinstance(education_data, dict) and not education_data:
+        return JsonResponse({'error': 'Data not available. Please run ETL pipeline.'}, status=503)
+
+    # Convert data to JSON format, replacing NaN with None for valid JSON
+    crime_json = crime_data.astype(object).where(pd.notnull(crime_data), None).to_dict(orient='records')
+    education_json = education_data.astype(object).where(pd.notnull(education_data), None).to_dict(orient='records')
+    income_json = income_data.astype(object).where(pd.notnull(income_data), None).to_dict(orient='records')
+    mental_health_json = mental_health_data.astype(object).where(pd.notnull(mental_health_data), None).to_dict(orient='records')
 
     # Return JSON response
     return JsonResponse({
@@ -40,26 +51,7 @@ def get_data(request):
     })
 
 def filter_data(request):
-    # Define the paths to your CSV files
-    base_dir = os.path.dirname(os.path.abspath(__file__))
-    crime_data_path = os.path.join(base_dir, 'data', 'crime_data.csv')
-    education_data_path = os.path.join(base_dir, 'data', 'education_data.csv')
-    income_data_path = os.path.join(base_dir, 'data', 'income_data.csv')
-    mental_health_data_path = os.path.join(base_dir, 'data', 'mental_health_data.csv')
-
-    # Read the CSV files into DataFrames
-    crime_data = pd.read_csv(crime_data_path)
-    education_data = pd.read_csv(education_data_path)
-    income_data = pd.read_csv(income_data_path)
-    mental_health_data = pd.read_csv(mental_health_data_path)
-
-    # Example: Merging or processing the data as required
-    # Here you should filter or process the data based on request parameters
-
-    # Example response
-    response_data = {
-        "example_field": "example_value",
-        # Add more fields based on your data and requirements
-    }
-
-    return JsonResponse(response_data)
+    # This endpoint seems redundant if frontend does filtering or if we move to API parameters.
+    # For now, let's keep it minimal or deprecate it.
+    # The existing implementation re-read CSVs on every request.
+    return JsonResponse({'message': 'Endpoint deprecated. Use /get_data and filter on client or implement specific query params.'})
