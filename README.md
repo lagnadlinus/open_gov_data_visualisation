@@ -91,8 +91,8 @@ Built with a focus on performance, scalability, and maintainability.
 | **Backend** | ![Django](https://img.shields.io/badge/Django-092E20?logo=django&logoColor=white) | Robust web framework serving JSON APIs and HTML. |
 | **Frontend** | ![HTML5](https://img.shields.io/badge/HTML5-E34F26?logo=html5&logoColor=white) ![JS](https://img.shields.io/badge/JavaScript-F7DF1E?logo=javascript&logoColor=black) | Semantic HTML + Vanilla JS for lightweight interactivity. |
 | **Viz** | ![Plotly](https://img.shields.io/badge/Plotly.js-3F4F75?logo=plotly&logoColor=white) | High-performance interactive charting library. |
-| **Data** | ![Pandas](https://img.shields.io/badge/Pandas-150458?logo=pandas&logoColor=white) ![Parquet](https://img.shields.io/badge/Apache%20Parquet-478546?logo=apache&logoColor=white) | ETL processing and optimized columnar storage. |
-| **Ops** | ![Docker](https://img.shields.io/badge/Docker-2496ED?logo=docker&logoColor=white) | Containerized deployment environment. |
+| **Data** | ![Pandas](https://img.shields.io/badge/Pandas-150458?logo=pandas&logoColor=white) ![Parquet](https://img.shields.io/badge/Apache%20Parquet-478546?logo=apache&logoColor=white) | ETL processing and optimised columnar storage. |
+| **Ops** | ![Docker](https://img.shields.io/badge/Docker-2496ED?logo=docker&logoColor=white) | Containerised deployment environment. |
 
 ---
 
