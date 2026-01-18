@@ -1,6 +1,6 @@
 # Security Policy
 
-We take the security of this open-source project seriously. Given that this repository hosts open government data visualizations, we prioritize data integrity, sanitation, and secure configuration.
+Security is very important aspect of any software. Given that this repository hosts open government data visualisations, we prioritise data integrity, sanitation, and secure configuration.
 
 ## Supported Versions
 
@@ -38,7 +38,7 @@ This project adheres to the following security standards:
 *   **Regular Audits**: We recommend running `pip-audit` or `safety` regularly to check for CVEs in third-party packages.
 
 ### 4. Infrastructure
-*   **Docker Isolation**: The application runs in a containerized environment, minimizing host system exposure.
+*   **Docker Isolation**: The application runs in a containerised environment, minimising host system exposure.
 *   **Debug Mode**: `DEBUG` is disabled by default in production configurations.
 
 ## Disclaimer
